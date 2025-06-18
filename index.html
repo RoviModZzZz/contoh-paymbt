@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Gateway</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --success: #00b894;
+            --danger: #d63031;
+            --light: #f5f6fa;
+            --dark: #2d3436;
+            --shadow: 0 10px 20px rgba(0,0,0,0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .payment-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            transform: translateY(0);
+            transition: var(--transition);
+        }
+
+        .payment-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        .payment-header {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .payment-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .payment-header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .payment-body {
+            padding: 30px;
+        }
+
+        .payment-method {
+            margin-bottom: 25px;
+        }
+
+        .payment-method h2 {
+            font-size: 1.2rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .payment-method h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .method {
+            display: flex;
+            align-items: center;
+            background: var(--light);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .method:hover {
+            transform: translateX(5px);
+            border-color: var(--primary);
+        }
+
+        .method.active {
+            border-color: var(--primary);
+            background: rgba(108, 92, 231, 0.1);
+        }
+
+        .method-logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            object-fit: contain;
+        }
+
+        .method-info {
+            flex: 1;
+        }
+
+        .method-info h3 {
+            font-size: 1rem;
+            color: var(--dark);
+            margin-bottom: 3px;
+        }
+
+        .method-info p {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+
+        .payment-details {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .payment-details.active {
+            display: block;
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+        }
+
+        .detail-item h3 {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+
+        .detail-item p {
+            font-size: 1rem;
+            color: var(--dark);
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            transition: var(--transition);
+        }
+
+        .copy-btn:hover {
+            background: var(--secondary);
+        }
+
+        .qris-image {
+            width: 100%;
+            max-width: 250px;
+            display: block;
+            margin: 15px auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: var(--transition);
+        }
+
+        .qris-image:hover {
+            transform: scale(1.03);
+        }
+
+        .payment-footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.8rem;
+            border-top: 1px solid #eee;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            transform: translateX(200%);
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 576px) {
+            .payment-body {
+                padding: 20px;
+            }
+            
+            .payment-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <div class="payment-header">
+            <h1>Payment Gateway</h1>
+            <p>Select your preferred payment method</p>
+        </div>
+        
+        <div class="payment-body">
+            <div class="payment-method">
+                <h2>E-Wallet Payment</h2>
+                
+                <div class="method" data-method="dana">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/72/Logo_DANA.svg" alt="DANA" class="method-logo">
+                    <div class="method-info">
+                        <h3>DANA</h3>
+                        <p>Transfer to DANA wallet</p>
+                    </div>
+                </div>
+                
+                <div class="method" data-method="gopay">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/86/Gopay_logo.svg" alt="GoPay" class="method-logo">
+                    <div class="method-info">
+                        <h3>GoPay</h3>
+                        <p>Transfer to GoPay wallet</p>
+                    </div>
+                </div>
+                
+                <div class="method" data-method="ovo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/Logo_ovo.svg" alt="OVO" class="method-logo">
+                    <div class="method-info">
+                        <h3>OVO</h3>
+                        <p>Transfer to OVO wallet</p>
+                    </div>
+                </div>
+                
+                <div class="method" data-method="qris">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" alt="QRIS" class="method-logo">
+                    <div class="method-info">
+                        <h3>QRIS</h3>
+                        <p>Scan QR code to pay</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="payment-details" id="dana-details">
+                <div class="detail-item">
+                    <h3>DANA Number</h3>
+                    <p>08155916384 <button class="copy-btn" data-text="08155916384">Copy</button></p>
+                </div>
+                <p style="text-align: center; margin-top: 20px; color: #7f8c8d; font-size: 0.9rem;">Please send payment to this DANA number</p>
+            </div>
+            
+            <div class="payment-details" id="gopay-details">
+                <div class="detail-item">
+                    <h3>GoPay Number</h3>
+                    <p>0895337157018 <button class="copy-btn" data-text="0895337157018">Copy</button></p>
+                </div>
+                <p style="text-align: center; margin-top: 20px; color: #7f8c8d; font-size: 0.9rem;">Please send payment to this GoPay number</p>
+            </div>
+            
+            <div class="payment-details" id="ovo-details">
+                <div class="detail-item">
+                    <h3>OVO Number</h3>
+                    <p>0895337157018 <button class="copy-btn" data-text="0895337157018">Copy</button></p>
+                </div>
+                <p style="text-align: center; margin-top: 20px; color: #7f8c8d; font-size: 0.9rem;">Please send payment to this OVO number</p>
+            </div>
+            
+            <div class="payment-details" id="qris-details">
+                <div class="detail-item">
+                    <h3>QRIS Code</h3>
+                    <p>Scan the QR code below to make payment</p>
+                </div>
+                <img src="https://files.catbox.moe/nf0he5.jpg" alt="QRIS Payment" class="qris-image">
+                <p style="text-align: center; margin-top: 10px; color: #7f8c8d; font-size: 0.9rem;">Scan this QR code using your banking/e-wallet app</p>
+            </div>
+        </div>
+        
+        <div class="payment-footer">
+            <p>After payment, please confirm via WhatsApp or email</p>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        Copied to clipboard!
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const methods = document.querySelectorAll('.method');
+            const details = document.querySelectorAll('.payment-details');
+            const copyButtons = document.querySelectorAll('.copy-btn');
+            const notification = document.getElementById('notification');
+            
+            // Method selection
+            methods.forEach(method => {
+                method.addEventListener('click', function() {
+                    // Remove active class from all methods
+                    methods.forEach(m => m.classList.remove('active'));
+                    
+                    // Add active class to clicked method
+                    this.classList.add('active');
+                    
+                    // Hide all details
+                    details.forEach(detail => detail.classList.remove('active'));
+                    
+                    // Show corresponding details
+                    const methodName = this.getAttribute('data-method');
+                    document.getElementById(`${methodName}-details`).classList.add('active');
+                });
+            });
+            
+            // Copy functionality
+            copyButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const text = this.getAttribute('data-text');
+                    
+                    navigator.clipboard.writeText(text).then(() => {
+                        showNotification();
+                    }).catch(err => {
+                        console.error('Failed to copy text: ', err);
+                    });
+                });
+            });
+            
+            // Show notification
+            function showNotification() {
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 2000);
+            }
+            
+            // Activate first method by default
+            methods[0].click();
+        });
+    </script>
+</body>
+</html>
